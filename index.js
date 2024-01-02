@@ -2,10 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const jwt = require('jsonwebtoken');
-// @ terminal node > require('crypto').randomBytes(64).toString('hex')
 require('dotenv').config()
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 3000; // Use process.env.PORT or default to 3000
 
@@ -32,7 +29,32 @@ async function run() {
     const userCollection = client.db("mindfulGurukulDb").collection("users");
 
  
-
+    app.get('/users', async (req, res) => {
+        const cursor = userCollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+    })
+    app.get('/users/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await userCollection.findOne(query)
+        res.send(result)
+    })
+    app.post('/users', async (req, res) => {
+        const users = req.body;
+        console.log(users);
+        const result = await userCollection.insertOne(users);
+        res.send(result);
+    });
+    
+    app.delete('/users/:id', async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: new ObjectId(id) }
+        const result = await userCollection.deleteOne(query);
+        res.send(result);
+        
+    })
   
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -47,7 +69,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('survey!')
+  res.send('MmindfulGurukul')
 })
 
 app.listen(port, () => {
