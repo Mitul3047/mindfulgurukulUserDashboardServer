@@ -55,6 +55,36 @@ async function run() {
         res.send(result);
         
     })
+    app.patch('/users/:id', async (req, res) => {
+      try {
+          const id = req.params.id;
+          const { name, email, photoURL, number, city, state } = req.body;
+  
+          const query = { _id: new ObjectId(id) };
+          const updateData = {
+              $set: {
+                  name,
+                  email,
+                  photoURL,
+                  number,
+                  city,
+                  state
+                  // Add other fields here that you want to update
+              }
+          };
+  
+          const result = await userCollection.updateOne(query, updateData);
+          
+          if (result.modifiedCount > 0) {
+              res.status(200).json({ message: 'User updated successfully' });
+          } else {
+              res.status(404).json({ message: 'User not found or no changes made' });
+          }
+      } catch (error) {
+          console.error("Error updating user:", error);
+          res.status(500).json({ message: 'Failed to update user' });
+      }
+  });
   
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
